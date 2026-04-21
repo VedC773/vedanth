@@ -273,10 +273,14 @@ public class Grade{
     double avg = sum / count;
     System.out.println("Average: " + avg);
     System.out.println("Letter grade: " + gradeFunction(avg));
-00
     scanner.close();
   }
 }
+
+docker build -t myapp
+docker login 
+docker tag myapp user_name/myapp:v1.0
+docker push user_name/myapp:v1.0
 
 ----------------------------------------------------------------------------------------------
 
