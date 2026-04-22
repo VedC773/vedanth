@@ -186,7 +186,7 @@ for port in range(70, 85):
 14a)
 from scapy.all import *
 def callback(packet):
-    if packet.haslayer(ICMP):s
+    if packet.haslayer(ICMP):
         print("ICMP Packet Detected")
         packet.show()
 
