@@ -1,3 +1,41 @@
+from PIL import Image
+img = Image.open("download.jpg").convert("RGB")
+pixels = img.load()
+
+message = input("enter the message to be hidden")
+msg = message + "#"  
+
+bits = ''.join(format(ord(c), '08b') for c in msg)
+
+i = 0
+for y in range(img.height):
+    for x in range(img.width):
+        if i < len(bits):
+            r, g, b = pixels[x, y]
+            pixels[x, y] = ((r & ~1) | int(bits[i]), g, b)
+            i += 1
+
+img.save("stego.png")
+print("Message hidden!")
+-------------------------------------------------------------------------------------
+img = Image.open("stego.png")
+pixels = img.load()
+
+bits = ""
+for y in range(img.height):
+    for x in range(img.width):
+        bits += str(pixels[x, y][0] & 1)
+
+msg = ""
+for i in range(0, len(bits), 8):
+    msg += chr(int(bits[i:i+8], 2))
+    if msg.endswith("#"):
+        break
+
+print("Hidden message:", msg[:-1])
+
+
+
 ## TCPDUMP
 sudo tcpdump -D
 sudo tcpdump -i enp0s3
